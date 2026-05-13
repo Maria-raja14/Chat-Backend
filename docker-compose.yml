@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
@@ -13,6 +11,11 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - chat_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   api-gateway:
     build:
@@ -25,9 +28,12 @@ services:
       - CHAT_SERVICE_URL=http://chat-service:4002
       - NOTIFICATION_SERVICE_URL=http://notification-service:4003
     depends_on:
-      - auth-service
-      - chat-service
-      - notification-service
+      auth-service:
+        condition: service_started
+      chat-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
     networks:
       - chat_network
 
@@ -44,7 +50,8 @@ services:
       - DB_NAME=chat_app
       - JWT_SECRET=supersecretjwtkey
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - chat_network
 
@@ -61,7 +68,8 @@ services:
       - DB_NAME=chat_app
       - JWT_SECRET=supersecretjwtkey
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - chat_network
 
@@ -77,10 +85,11 @@ services:
       - DB_PASSWORD=root
       - DB_NAME=chat_app
       - EMAIL_SERVICE=gmail
-      - EMAIL_USER=${EMAIL_USER:-}
-      - EMAIL_PASS=${EMAIL_PASS:-}
+      - EMAIL_USER=raja.techzar@gmail.com
+      - EMAIL_PASS=sdrt vthc mvva rnxb
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - chat_network
 
