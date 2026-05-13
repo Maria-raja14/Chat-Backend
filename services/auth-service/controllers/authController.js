@@ -51,7 +51,7 @@ async function register(req, res, next) {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const user = await User.create({ username, email, password: hashedPassword, displayName });
 
-    const token = createToken({ id: user.id });
+    const token = createToken({ id: user.id, username: user.username, displayName: user.displayName });
     return sendSuccess(res, {
       user: {
         id: encryptId(user.id),
@@ -84,7 +84,7 @@ async function login(req, res, next) {
       return sendError(res, RESPONSE_CODES.UNAUTHORIZED, 'Invalid credentials.', {});
     }
 
-    const token = createToken({ id: user.id });
+    const token = createToken({ id: user.id, username: user.username, displayName: user.displayName });
     return sendSuccess(res, {
       user: {
         id: encryptId(user.id),

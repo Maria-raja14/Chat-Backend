@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: chat_app
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - chat_network
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - AUTH_SERVICE_URL=http://auth-service:4001
+      - CHAT_SERVICE_URL=http://chat-service:4002
+      - NOTIFICATION_SERVICE_URL=http://notification-service:4003
+    depends_on:
+      - auth-service
+      - chat-service
+      - notification-service
+    networks:
+      - chat_network
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=chat_app
+      - JWT_SECRET=supersecretjwtkey
+    depends_on:
+      - db
+    networks:
+      - chat_network
+
+  chat-service:
+    build:
+      context: ./services/chat-service
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=chat_app
+      - JWT_SECRET=supersecretjwtkey
+    depends_on:
+      - db
+    networks:
+      - chat_network
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+    ports:
+      - "4003:4003"
+    environment:
+      - PORT=4003
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=chat_app
+      - EMAIL_SERVICE=gmail
+      - EMAIL_USER=${EMAIL_USER:-}
+      - EMAIL_PASS=${EMAIL_PASS:-}
+    depends_on:
+      - db
+    networks:
+      - chat_network
+
+volumes:
+  db_data:
+
+networks:
+  chat_network:
+    driver: bridge

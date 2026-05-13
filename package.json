@@ -1,35 +1,10 @@
 {
-  "name": "chat-app-backend",
+  "name": "chat-app-microservices",
   "version": "1.0.0",
-  "description": "Secure real-time chat backend using Express, Sequelize, and Socket.IO",
-  "type": "module",
-  "main": "index.js",
+  "description": "Microservices backend for Chat App",
+  "private": true,
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "migrate": "sequelize db:migrate",
-    "migrate:undo": "sequelize db:migrate:undo:all"
-  },
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "express-rate-limit": "^6.8.0",
-    "express-validator": "^7.0.1",
-    "helmet": "^7.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.6.0",
-    "pg": "^8.13.0",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.33.0",
-    "socket.io": "^4.8.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1",
-    "sequelize-cli": "^6.6.1"
-  },
-  "engines": {
-    "node": ">=18"
+    "start": "docker-compose up --build",
+    "stop": "docker-compose down"
   }
 }

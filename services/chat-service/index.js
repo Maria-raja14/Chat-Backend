@@ -7,10 +7,10 @@ import rateLimit from 'express-rate-limit';
 import { Server } from 'socket.io';
 import mysql from 'mysql2/promise';
 import models from './models/index.js';
-import routes from './routes/index.js';
-import { authMiddleware } from './middlewares/authMiddleware.js';
+import chatRoutes from './routes/chatRoutes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
-import { verifySocketToken } from './controllers/authController.js';
+import { authMiddleware } from './middlewares/authMiddleware.js';
+import jwt from 'jsonwebtoken';
 import { encryptId, decryptId } from './utils/secureId.js';
 
 const { sequelize, Message, Chat } = models;
@@ -55,7 +55,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-app.use('/api', routes);
+app.use('/api/chat', authMiddleware, chatRoutes); // It was /api/chat before, API Gateway routes /api/chat to /api/chat
 app.use(errorHandler);
 
 io.use(async (socket, next) => {
@@ -65,7 +65,11 @@ io.use(async (socket, next) => {
     if (!token) {
       return next(new Error('Authentication token missing from Socket.IO handshake.'));
     }
-    const user = await verifySocketToken(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+    if (!decoded || !decoded.id) {
+      return next(new Error('User not found in token.'));
+    }
+    const user = { id: decoded.id, username: decoded.username, displayName: decoded.displayName };
     socket.data.user = user;
     return next();
   } catch (error) {
@@ -128,7 +132,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4002;
 
 (async () => {
   try {
@@ -137,7 +141,7 @@ const port = process.env.PORT || 4000;
     await sequelize.sync({ alter: true });
 
     server.listen(port, () => {
-      console.log(`Secure chat backend is running on http://localhost:${port}`);
+      console.log(`Chat service is running on http://localhost:${port}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

@@ -1,8 +1,8 @@
 import { Sequelize, Op } from 'sequelize';
 import databaseConfig from '../config/database.js';
-import User from './user.js';
 import Chat from './chat.js';
 import Message from './message.js';
+import User from './user.js';
 
 const environment = process.env.NODE_ENV || 'development';
 const config = databaseConfig[environment];
