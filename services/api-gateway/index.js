@@ -27,6 +27,7 @@ app.use(limiter);
 const AUTH_SERVICE = process.env.AUTH_SERVICE_URL || 'http://localhost:4001';
 const CHAT_SERVICE = process.env.CHAT_SERVICE_URL || 'http://localhost:4002';
 const NOTIFICATION_SERVICE = process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:4003';
+const FILE_SERVICE = process.env.FILE_SERVICE_URL || 'http://localhost:4004';
 
 // Proxy rules
 app.use('/api/auth', createProxyMiddleware({ target: AUTH_SERVICE, changeOrigin: true }));
@@ -37,6 +38,7 @@ app.use('/api/chat', createProxyMiddleware({ target: CHAT_SERVICE, changeOrigin:
 app.use('/socket.io', createProxyMiddleware({ target: CHAT_SERVICE, ws: true, changeOrigin: true }));
 
 app.use('/api/otp', createProxyMiddleware({ target: NOTIFICATION_SERVICE, changeOrigin: true }));
+app.use('/api/files', createProxyMiddleware({ target: FILE_SERVICE, changeOrigin: true }));
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'API Gateway is running' });

@@ -27,12 +27,15 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:4001
       - CHAT_SERVICE_URL=http://chat-service:4002
       - NOTIFICATION_SERVICE_URL=http://notification-service:4003
+      - FILE_SERVICE_URL=http://file-service:4004
     depends_on:
       auth-service:
         condition: service_started
       chat-service:
         condition: service_started
       notification-service:
+        condition: service_started
+      file-service:
         condition: service_started
     networks:
       - chat_network
@@ -87,6 +90,24 @@ services:
       - EMAIL_SERVICE=gmail
       - EMAIL_USER=raja.techzar@gmail.com
       - EMAIL_PASS=sdrt vthc mvva rnxb
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - chat_network
+
+  file-service:
+    build:
+      context: ./services/file-service
+    ports:
+      - "4004:4004"
+    env_file:
+      - ./services/file-service/.env
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=chat_app
     depends_on:
       db:
         condition: service_healthy
